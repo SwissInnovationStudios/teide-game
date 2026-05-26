@@ -11,10 +11,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/teide/assets/index-BztD4gCm.js"></script>
-  <link rel="stylesheet" crossorigin href="/teide/assets/index-sBFx58n6.css">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" rel="stylesheet">
+  <script type="module" crossorigin src="/teide/assets/index-DnUwliau.js"></script>
+  <link rel="stylesheet" crossorigin href="/teide/assets/index-DR8PwdRq.css">
 </head>
 <body>
+
+<!-- Test-mode visual cue: red border framing the viewport, toggled by hud.js
+     when gameState.testMode is true. Full-screen, ignores pointer events. -->
+<div id="test-mode-border" aria-hidden="true"></div>
+
+<!-- Island compass — centred at top, Fortnite-style bar showing the player's
+     heading with the 7 Canaries placed on it by relative bearing. Built and
+     updated by src/compass.js. -->
+<div id="island-compass" aria-hidden="true">
+  <div class="compass-track">
+    <div class="compass-center-tick"></div>
+  </div>
+</div>
 
 <div id="hud">
   <div class="row"><span class="label">Pts</span><span class="value" id="pts">00000</span></div>
@@ -25,6 +39,59 @@
   <div class="row" id="lift-row" style="opacity: 0;"><span class="label">↑↑↑</span><span class="value">LIFT</span></div>
 </div>
 
+<!-- Top-right progression panel. Always visible. Three buttons open modal
+     overlays (#shop-overlay, #tuning-overlay, #plane-overlay) further down.
+     Gofios block shows discovery progress per type plus the next tier's
+     remaining gofios. Mini-map slot is empty for Phase 4.3b. -->
+<div id="top-panel">
+  <div class="tp-buttons">
+    <button class="tp-btn" data-modal="garage" type="button">
+      <span class="material-symbols-outlined">build</span><span class="tp-label">Garage</span>
+    </button>
+    <button class="tp-btn" data-modal="shop" type="button">
+      <span class="material-symbols-outlined">storefront</span><span class="tp-label">Shop</span>
+    </button>
+  </div>
+
+  <div class="tp-section">
+    <div class="tp-section-title">Gofios · <span id="tp-island">Tenerife</span></div>
+    <div class="tp-gofios-rows">
+      <div class="tp-gofios-row" data-type="peak">
+        <span class="material-symbols-outlined">mountain_flag</span>
+        <span class="tp-gofios-label">Berge</span>
+        <span class="tp-gofios-count" data-tp="peak-count">0/0</span>
+      </div>
+      <div class="tp-gofios-row" data-type="city">
+        <span class="material-symbols-outlined">location_city</span>
+        <span class="tp-gofios-label">Städte</span>
+        <span class="tp-gofios-count" data-tp="city-count">0/0</span>
+      </div>
+      <div class="tp-gofios-row" data-type="landscape">
+        <span class="material-symbols-outlined">landscape</span>
+        <span class="tp-gofios-label">Landsch.</span>
+        <span class="tp-gofios-count" data-tp="landscape-count">0/0</span>
+      </div>
+      <div class="tp-gofios-row" data-type="beach">
+        <span class="material-symbols-outlined">beach_access</span>
+        <span class="tp-gofios-label">Strände</span>
+        <span class="tp-gofios-count" data-tp="beach-count">0/0</span>
+      </div>
+    </div>
+    <div class="tp-tier-line">
+      <span class="tp-tier-current" id="tp-tier-current">No Booster</span>
+      <span class="tp-gofios-total" id="tp-gofios-total">0 G</span>
+    </div>
+    <div class="tp-tier-progress" id="tp-tier-progress">→ Booster Level 1 in 5 G</div>
+  </div>
+
+  <div class="tp-section tp-minimap">
+    <div class="tp-section-title">Karte</div>
+    <div id="tp-minimap-canvas" class="tp-minimap-canvas">
+      <span class="tp-minimap-placeholder">soon</span>
+    </div>
+  </div>
+</div>
+
 <div id="boost-panel">
   <span class="label">Bst</span>
   <div class="boost-bar"><div class="boost-bar-fill" id="boost-grey-fill"></div></div>
@@ -33,6 +100,15 @@
 
 <div id="landing-toast"></div>
 
+<!-- POI activation toast: shown for ~3 s when a ring is flown through for the
+     first time. Carries the POI name plus punkte + gofios earned + tier unlock
+     if any. -->
+<div id="poi-toast"></div>
+
+<!-- POI hover label: passive nav cue that names the nearest already-explored
+     POI while the plane is within POI_CFG.hoverLabelRadius. -->
+<div id="poi-label"></div>
+
 <div id="controls-hint">
   ↑ ↓ &nbsp;Pitch &nbsp;·&nbsp; ← → &nbsp;Bank &nbsp;·&nbsp; Space &nbsp;Brake &nbsp;·&nbsp; Shift &nbsp;Boost &nbsp;·&nbsp; F &nbsp;One-Shot
 </div>
@@ -40,6 +116,73 @@
 <div id="crash">
   <h2>Bruchlandung</h2>
   <button id="restart-btn">Take Off Again</button>
+</div>
+
+<!-- Progression modals. Both share the dark-glass overlay pattern from
+     the imprint. Garage is the player's workshop view (stats + upgrades
+     in one place); Shop is an Obsidian-IAP stub. -->
+<div id="garage-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal-panel modal-panel-wide" role="dialog" aria-modal="true" aria-labelledby="garage-title">
+    <button class="modal-close" data-modal-close="garage" type="button" aria-label="Schliessen">×</button>
+    <h2 id="garage-title">Garage</h2>
+    <div class="garage-wallet">
+      <div class="wallet-cell">
+        <span class="wallet-label">Punkte</span>
+        <span class="wallet-value" id="garage-punkte">0</span>
+      </div>
+      <div class="wallet-cell">
+        <span class="wallet-label">High Score</span>
+        <span class="wallet-value" id="garage-highscore">0</span>
+      </div>
+      <div class="wallet-cell">
+        <span class="wallet-label">Obsidian</span>
+        <span class="wallet-value" id="garage-obsidian">0</span>
+      </div>
+      <div class="wallet-cell">
+        <span class="wallet-label">Insel</span>
+        <span class="wallet-value" id="garage-island">Tenerife</span>
+      </div>
+      <div class="wallet-cell">
+        <span class="wallet-label">Booster</span>
+        <span class="wallet-value" id="garage-booster">No Booster</span>
+      </div>
+    </div>
+    <div class="garage-body">
+      <div class="garage-stats-col">
+        <div class="garage-col-title">Status</div>
+        <div id="garage-stats"></div>
+      </div>
+      <div class="garage-upgrades-col">
+        <div class="garage-col-title">Upgrades</div>
+        <div id="garage-upgrades" class="upgrade-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm dialog overlaid on Garage when a buy would spend Obsidian
+     (premium currency). Closes via cancel button, ESC, or backdrop click. -->
+<div id="obsidian-confirm" class="modal-overlay obsidian-confirm" aria-hidden="true">
+  <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true">
+    <h2>Mit Obsidian bezahlen?</h2>
+    <p id="obsidian-confirm-text">Dieses Upgrade kostet <strong></strong>.</p>
+    <p class="obsidian-confirm-warn">Obsidian wird mit echtem Geld gekauft. Klick auf <em>Bestätigen</em> nur, wenn du wirklich Obsidian ausgeben willst.</p>
+    <div class="obsidian-confirm-actions">
+      <button id="obsidian-confirm-cancel" type="button" class="btn-ghost">Abbrechen</button>
+      <button id="obsidian-confirm-ok" type="button" class="btn-primary">Bestätigen</button>
+    </div>
+  </div>
+</div>
+
+<div id="shop-overlay" class="modal-overlay" aria-hidden="true">
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+    <button class="modal-close" data-modal-close="shop" type="button" aria-label="Schliessen">×</button>
+    <h2 id="shop-title">Shop</h2>
+    <div class="modal-wallet">
+      Obsidian: <span id="shop-obsidian">0</span>
+    </div>
+    <p class="shop-stub">Obsidian-Pakete und In-App-Käufe folgen in einem späteren Update. Bis dahin kann der Shop nicht genutzt werden.</p>
+  </div>
 </div>
 
 <button id="imprint-link" type="button">Impressum</button>
