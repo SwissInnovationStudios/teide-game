@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Teide: Glide the Canaries</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/teide/assets/index-CQY8Xkii.js"></script>
+  <link rel="stylesheet" crossorigin href="/teide/assets/index-BDND8Ymg.css">
+</head>
+<body>
+
+<div id="hud">
+  <div class="row"><span class="label">Pts</span><span class="value" id="pts">00000</span></div>
+  <div class="row"><span class="label">Lnd</span><span class="value" id="lnd">00</span></div>
+  <div class="row"><span class="label">Alt</span><span class="value" id="alt">000</span></div>
+  <div class="row"><span class="label">Spd</span><span class="value" id="spd">000</span></div>
+  <div class="row"><span class="label">Hdg</span><span class="value" id="hdg">000</span></div>
+  <div class="row" id="lift-row" style="opacity: 0;"><span class="label">↑↑↑</span><span class="value">LIFT</span></div>
+</div>
+
+<div id="landing-toast"></div>
+
+<div id="controls-hint">
+  ↑ ↓ &nbsp;Pitch &nbsp;·&nbsp; ← → &nbsp;Bank &nbsp;·&nbsp; Space &nbsp;Brake
+</div>
+
+<div id="crash">
+  <h2>Bruchlandung</h2>
+  <button id="restart-btn">Take Off Again</button>
+</div>
+
+<button id="imprint-link" type="button">Impressum</button>
+
+<div id="imprint-overlay" aria-hidden="true">
+  <div id="imprint-panel" role="dialog" aria-modal="true" aria-labelledby="imprint-title">
+    <button id="imprint-close" type="button" aria-label="Schliessen">×</button>
+    <h2 id="imprint-title">Impressum</h2>
+
+    <section>
+      <div class="imprint-label">Anbieter</div>
+      <p class="imprint-name">Swiss Innovation Studios</p>
+      <p>Meierenaustrasse 18</p>
+      <p>9443 Widnau</p>
+      <p>Schweiz</p>
+    </section>
+
+    <section>
+      <div class="imprint-label">Kontakt</div>
+      <p><a href="mailto:swissinnovationstudios@gmail.com">swissinnovationstudios@gmail.com</a></p>
+    </section>
+
+    <section>
+      <div class="imprint-label">Haftung für Links</div>
+      <p class="imprint-legal">
+        Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen
+        Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen.
+        Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der
+        Seiten verantwortlich.
+      </p>
+    </section>
+
+    <div class="imprint-footer">Swiss Innovation Studios · 2026</div>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const link    = document.getElementById('imprint-link');
+    const overlay = document.getElementById('imprint-overlay');
+    const closeBtn = document.getElementById('imprint-close');
+    const open  = () => { overlay.classList.add('visible'); overlay.setAttribute('aria-hidden', 'false'); };
+    const close = () => { overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden', 'true'); };
+    link.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('visible')) close(); });
+  })();
+</script>
+
+
+</body>
+</html>
