@@ -32,8 +32,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" rel="stylesheet">
-  <script type="module" crossorigin src="/teide/assets/index-amBPjJoL.js"></script>
-  <link rel="stylesheet" crossorigin href="/teide/assets/index-BgXU2-Xl.css">
+  <script type="module" crossorigin src="/teide/assets/index-BZwxgSFU.js"></script>
+  <link rel="stylesheet" crossorigin href="/teide/assets/index-EuyTd2b9.css">
 </head>
 <body>
 
@@ -166,6 +166,15 @@
 <div id="crash">
   <h2>Bruchlandung</h2>
   <button id="restart-btn">Take Off Again</button>
+  <div id="crash-hint">Leertaste</div>
+  <div id="crash-secondary">
+    <button id="crash-hangar-btn" type="button">
+      <span class="material-symbols-outlined">garage</span>Hangar
+    </button>
+    <button id="crash-shop-btn" type="button">
+      <span class="material-symbols-outlined">storefront</span>Shop
+    </button>
+  </div>
 </div>
 
 <!-- Progression modals. All share the dark-glass overlay pattern from the
@@ -292,6 +301,29 @@
     <div class="settings-actions">
       <button id="settings-cancel" type="button" class="btn-ghost">Abbrechen</button>
       <button id="settings-apply"  type="button" class="btn-primary">Anwenden &amp; Neu laden</button>
+    </div>
+
+    <div class="settings-section settings-section-danger">
+      <div class="settings-section-title settings-section-title-danger">Danger Zone</div>
+      <p class="settings-danger-desc">Setzt den kompletten Spielfortschritt zurück: Punkte, Gofios, Upgrades, entdeckte POIs, Flughäfen und Checkpoint. Grafik-Einstellungen bleiben erhalten.</p>
+      <div class="settings-danger-actions">
+        <button id="settings-reset-save" type="button" class="btn-danger">Spielstand zurücksetzen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset-Spielstand confirm dialog. Same pattern as obsidian-confirm: ESC,
+     backdrop click, and Abbrechen all dismiss; only the explicit "Zurücksetzen"
+     button performs the destructive action (wipeSave + reload). -->
+<div id="reset-confirm" class="modal-overlay obsidian-confirm" aria-hidden="true">
+  <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true">
+    <h2>Spielstand wirklich löschen?</h2>
+    <p>Alle Punkte, Gofios, Upgrades und entdeckten Orte gehen verloren. Du startest auf <strong>Tenerife Nord</strong> mit dem Basis-Flugzeug.</p>
+    <p class="obsidian-confirm-warn">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+    <div class="obsidian-confirm-actions">
+      <button id="reset-confirm-cancel" type="button" class="btn-ghost">Abbrechen</button>
+      <button id="reset-confirm-ok" type="button" class="btn-danger">Zurücksetzen</button>
     </div>
   </div>
 </div>
