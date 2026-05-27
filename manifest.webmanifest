@@ -1,0 +1,17 @@
+{
+  "name": "Teide: Glide the Canaries",
+  "short_name": "Teide",
+  "description": "Minimalist paper-plane gliding game above the Canary Islands.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#E85F5C",
+  "theme_color": "#E85F5C",
+  "lang": "de",
+  "icons": [
+    { "src": "/icon-192.png",          "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png",          "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
