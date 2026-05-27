@@ -32,8 +32,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" rel="stylesheet">
-  <script type="module" crossorigin src="/teide/assets/index-DyVmUP_9.js"></script>
-  <link rel="stylesheet" crossorigin href="/teide/assets/index-4LUq3tMQ.css">
+  <script type="module" crossorigin src="/teide/assets/index-CB6EJFI3.js"></script>
+  <link rel="stylesheet" crossorigin href="/teide/assets/index-CMp4PI-_.css">
 </head>
 <body>
 
@@ -63,61 +63,74 @@
   </div>
 </div>
 
-<div id="hud">
-  <div class="row"><span class="label">Pts</span><span class="value" id="pts">00000</span></div>
-  <div class="row"><span class="label">Lnd</span><span class="value" id="lnd">00</span></div>
-  <div class="row"><span class="label">Alt</span><span class="value" id="alt">000</span></div>
-  <div class="row"><span class="label">Spd</span><span class="value" id="spd">000</span></div>
-  <div class="row"><span class="label">Hdg</span><span class="value" id="hdg">000</span></div>
-  <div class="row" id="lift-row" style="opacity: 0;"><span class="label">↑↑↑</span><span class="value">LIFT</span></div>
+<!-- Edge tapes — vertical scrolling readouts that replace the old top-left
+     text HUD. Speed sits at the left rim, altitude at the right. Both run
+     like the horizontal compass at the top: ticks scroll past a fixed
+     centre marker that shows the current value. src/tapes.js builds them
+     at boot and updates the transform per frame. -->
+<div id="speed-tape"  class="edge-tape edge-tape-left"></div>
+<div id="alt-tape"    class="edge-tape edge-tape-right"></div>
+
+<!-- Lift indicator — pops up when the plane is in a thermal. Tiny chip
+     that lives next to the speed tape so the cue stays close to the rate-
+     of-energy reading. -->
+<div id="lift-indicator">
+  <span class="material-symbols-outlined">arrow_upward</span>
+  Lift
 </div>
 
-<!-- Top-right progression panel. Always visible during flight. The pause
-     button opens the Welcome screen, from which Hangar / Shop / Settings /
-     Levels are all reachable. ESC does the same. Gofios + mini-map slot
-     stay in-flight as ambient progression cues. -->
-<div id="top-panel">
-  <div class="tp-buttons">
-    <button id="pause-btn" class="tp-btn tp-btn-pause" type="button" aria-label="Pause-Menü">
-      <span class="material-symbols-outlined">menu</span><span class="tp-label">Menü</span>
-    </button>
-  </div>
+<!-- HUD layer: pause pill top-right + combined map / POI card bottom-right.
+     The card hosts the round minimap (left half) and the four discovered-
+     POI counters (right half). An island name floats above the map when
+     the plane is over / near an island, otherwise it's hidden. -->
+<button id="pause-btn" type="button" aria-label="Pause">
+  <span class="material-symbols-outlined">pause</span>
+</button>
 
-  <div class="tp-section">
-    <div class="tp-section-title">Gofios · <span id="tp-island">Tenerife</span></div>
-    <div class="tp-gofios-rows">
-      <div class="tp-gofios-row" data-type="peak">
-        <span class="material-symbols-outlined">mountain_flag</span>
-        <span class="tp-gofios-label">Berge</span>
-        <span class="tp-gofios-count" data-tp="peak-count">0/0</span>
-      </div>
-      <div class="tp-gofios-row" data-type="city">
-        <span class="material-symbols-outlined">location_city</span>
-        <span class="tp-gofios-label">Städte</span>
-        <span class="tp-gofios-count" data-tp="city-count">0/0</span>
-      </div>
-      <div class="tp-gofios-row" data-type="landscape">
-        <span class="material-symbols-outlined">landscape</span>
-        <span class="tp-gofios-label">Landsch.</span>
-        <span class="tp-gofios-count" data-tp="landscape-count">0/0</span>
-      </div>
-      <div class="tp-gofios-row" data-type="beach">
-        <span class="material-symbols-outlined">beach_access</span>
-        <span class="tp-gofios-label">Strände</span>
-        <span class="tp-gofios-count" data-tp="beach-count">0/0</span>
-      </div>
-    </div>
-    <div class="tp-tier-line">
-      <span class="tp-tier-current" id="tp-tier-current">No Booster</span>
-      <span class="tp-gofios-total" id="tp-gofios-total">0 G</span>
-    </div>
-    <div class="tp-tier-progress" id="tp-tier-progress">→ Booster Level 1 in 5 G</div>
-  </div>
-
-  <div class="tp-section tp-minimap">
-    <div class="tp-section-title">Karte</div>
-    <div id="tp-minimap-canvas" class="tp-minimap-canvas">
+<div id="map-card">
+  <div class="map-card-island" id="tp-island">Tenerife</div>
+  <div class="map-card-body">
+    <div id="tp-minimap-canvas">
       <span class="tp-minimap-placeholder">soon</span>
+    </div>
+    <div class="map-card-pois">
+      <div class="map-card-pois-icons">
+        <div class="tp-gofios-row" data-type="peak">
+          <span class="material-symbols-outlined">mountain_flag</span>
+          <span class="tp-gofios-count" data-tp="peak-count">0/0</span>
+        </div>
+        <div class="tp-gofios-row" data-type="city">
+          <span class="material-symbols-outlined">location_city</span>
+          <span class="tp-gofios-count" data-tp="city-count">0/0</span>
+        </div>
+        <div class="tp-gofios-row" data-type="landscape">
+          <span class="material-symbols-outlined">landscape</span>
+          <span class="tp-gofios-count" data-tp="landscape-count">0/0</span>
+        </div>
+        <div class="tp-gofios-row" data-type="beach">
+          <span class="material-symbols-outlined">beach_access</span>
+          <span class="tp-gofios-count" data-tp="beach-count">0/0</span>
+        </div>
+      </div>
+      <div class="map-card-stats">
+        <div class="map-card-stats-score">
+          <span class="map-card-punkte" id="map-card-punkte">0</span>
+          <span class="map-card-highscore">
+            <span class="map-card-highscore-label">HS</span>
+            <span id="map-card-highscore">0</span>
+          </span>
+        </div>
+        <div class="map-card-stats-landings" aria-label="Landungen">
+          <div class="map-card-stats-landings-current">
+            <span class="material-symbols-outlined">flight_land</span>
+            <span id="map-card-landings">0</span>
+          </div>
+          <span class="map-card-landings-highscore">
+            <span class="map-card-highscore-label">HS</span>
+            <span id="map-card-landings-best">0</span>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -314,7 +327,27 @@
         </span>
       </button>
     </nav>
-    <div class="welcome-footer">v0.1 · Swiss Innovation Studios</div>
+    <div class="welcome-footer">
+      <button class="imprint-link" type="button">Impressum</button>
+      <span class="welcome-footer-version">v0.1 · Swiss Innovation Studios</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pause overlay — opened by the in-flight pause button (or ESC). Mirrors
+     the crash overlay's "one big primary action" feel: a single "Flug
+     fortsetzen" button to dismiss + an Impressum link tucked underneath
+     (the imprint is only reachable from this overlay and from the welcome
+     screen — clear of the world view while you're actually playing). -->
+<div id="pause-overlay" aria-hidden="true">
+  <div class="pause-panel" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="pause-eyebrow" id="pause-title">Pause</div>
+    <button id="pause-resume" type="button" class="pause-resume">
+      <span class="material-symbols-outlined">play_arrow</span>
+      Flug fortsetzen
+    </button>
+    <button id="pause-home" type="button" class="pause-home">Hauptmenü</button>
+    <button class="imprint-link" type="button">Impressum</button>
   </div>
 </div>
 
@@ -346,8 +379,6 @@
     </div>
   </div>
 </div>
-
-<button id="imprint-link" type="button">Impressum</button>
 
 <div id="imprint-overlay" aria-hidden="true">
   <div id="imprint-panel" role="dialog" aria-modal="true" aria-labelledby="imprint-title">
@@ -382,16 +413,27 @@
 </div>
 
 <script>
+  // Impressum trigger: any element with class "imprint-link" opens the
+  // overlay. The link only lives inside the Welcome and Pause overlays now
+  // (no more always-visible bottom-right button) so the in-game view stays
+  // clean. ESC closes the imprint, and the keydown handler stopPropagation
+  // keeps the welcome/pause ESC logic out of the way.
   (() => {
-    const link    = document.getElementById('imprint-link');
-    const overlay = document.getElementById('imprint-overlay');
+    const overlay  = document.getElementById('imprint-overlay');
     const closeBtn = document.getElementById('imprint-close');
     const open  = () => { overlay.classList.add('visible'); overlay.setAttribute('aria-hidden', 'false'); };
     const close = () => { overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden', 'true'); };
-    link.addEventListener('click', open);
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.imprint-link')) open();
+    });
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && overlay.classList.contains('visible')) close(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('visible')) {
+        close();
+        e.stopImmediatePropagation();
+      }
+    });
   })();
 </script>
 
