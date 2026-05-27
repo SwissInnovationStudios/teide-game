@@ -32,8 +32,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400;500&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" rel="stylesheet">
-  <script type="module" crossorigin src="/teide/assets/index-CB6EJFI3.js"></script>
-  <link rel="stylesheet" crossorigin href="/teide/assets/index-CMp4PI-_.css">
+  <script type="module" crossorigin src="/teide/assets/index-tx4DEFl5.js"></script>
+  <link rel="stylesheet" crossorigin href="/teide/assets/index-BygXWgEq.css">
 </head>
 <body>
 
@@ -114,9 +114,12 @@
       </div>
       <div class="map-card-stats">
         <div class="map-card-stats-score">
-          <span class="map-card-punkte" id="map-card-punkte">0</span>
+          <span class="map-card-punkte-row">
+            <span class="material-symbols-outlined map-card-punkte-icon">stars</span>
+            <span class="map-card-punkte" id="map-card-punkte">0</span>
+          </span>
           <span class="map-card-highscore">
-            <span class="map-card-highscore-label">HS</span>
+            <span class="map-card-highscore-label material-symbols-outlined">workspace_premium</span>
             <span id="map-card-highscore">0</span>
           </span>
         </div>
@@ -126,7 +129,7 @@
             <span id="map-card-landings">0</span>
           </div>
           <span class="map-card-landings-highscore">
-            <span class="map-card-highscore-label">HS</span>
+            <span class="map-card-highscore-label material-symbols-outlined">workspace_premium</span>
             <span id="map-card-landings-best">0</span>
           </span>
         </div>
@@ -136,9 +139,13 @@
 </div>
 
 <div id="boost-panel">
-  <span class="label">Bst</span>
+  <span class="material-symbols-outlined boost-panel-icon">rocket_launch</span>
   <div class="boost-bar"><div class="boost-bar-fill" id="boost-grey-fill"></div></div>
-  <div class="boost-tile" id="boost-oneshot-tile"></div>
+  <!-- One-shot indicator: a rocket symbol tinted to the current tier
+       colour. While the boost is firing, hud.js drives a CSS variable
+       (--drain-pct) so a grey "fuel-consumed" wipe descends from the top
+       of the icon as the tank drains. -->
+  <span id="boost-oneshot-tile" class="material-symbols-outlined boost-oneshot-icon">rocket_launch</span>
 </div>
 
 <div id="landing-toast"></div>
@@ -172,19 +179,27 @@
     <h2 id="hangar-title">Hangar</h2>
     <div class="garage-wallet">
       <div class="wallet-cell">
-        <span class="wallet-label">Punkte</span>
+        <span class="wallet-label">
+          <span class="material-symbols-outlined">stars</span>Punkte
+        </span>
         <span class="wallet-value" id="garage-punkte">0</span>
       </div>
       <div class="wallet-cell">
-        <span class="wallet-label">Gofios</span>
+        <span class="wallet-label">
+          <span class="material-symbols-outlined">where_to_vote</span>Locations
+        </span>
         <span class="wallet-value" id="garage-gofios">0</span>
       </div>
       <div class="wallet-cell">
-        <span class="wallet-label">Obsidian</span>
+        <span class="wallet-label">
+          <span class="material-symbols-outlined">diamond</span>Obsidian
+        </span>
         <span class="wallet-value" id="garage-obsidian">0</span>
       </div>
       <div class="wallet-cell">
-        <span class="wallet-label">High Score</span>
+        <span class="wallet-label">
+          <span class="material-symbols-outlined">workspace_premium</span>Highscore
+        </span>
         <span class="wallet-value" id="garage-highscore">0</span>
       </div>
     </div>
@@ -234,7 +249,8 @@
     <button class="modal-close" data-modal-close="shop" type="button" aria-label="Schliessen">×</button>
     <h2 id="shop-title">Shop</h2>
     <div class="modal-wallet">
-      Obsidian: <span id="shop-obsidian">0</span>
+      <span class="material-symbols-outlined modal-wallet-icon">diamond</span>
+      <span id="shop-obsidian">0</span>
     </div>
     <p class="shop-stub">Obsidian-Pakete und In-App-Käufe folgen in einem späteren Update. Bis dahin kann der Shop nicht genutzt werden.</p>
   </div>
