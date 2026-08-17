@@ -34,10 +34,10 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-DJDn2i_T.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-B9BvNUaU.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-BxtWkdWK.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-CC8jnLAk.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-CaudacLP.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-C_A_6Ryd.css">
 </head>
 <body>
 
@@ -169,6 +169,56 @@
     </div>
   </div>
 </div>
+
+<!-- GAME-17: live score chip — Punkte of the CURRENT flight, top-left. The
+     small badge next to the number is the GAME-18 run multiplier ("×1,4");
+     both turn gold while Golden Wings are active. Updated per-frame (cached)
+     by hud.js updateScoreChip(). -->
+<div id="score-chip" aria-label="Points this flight" data-i18n-aria="a11y.flightScore">
+  <span class="material-symbols-outlined score-chip-icon">stars</span>
+  <span id="score-chip-value">0</span>
+  <span id="score-chip-mult" hidden></span>
+</div>
+
+<!-- GAME-18: Golden-Wings wing glyph (Gabriels SVG) — defined once, used by
+     the brake-slot button, the desktop button, the panel and the shop tile
+     via <use>. fill inherits currentColor. -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="icon-golden-wing" viewBox="0 0 32 32">
+    <path d="M28.665 25.537c-1.966-1.094-3.116-2.962-3.232-4.673-0.619-9.164-15.889-10.357-23.662-19.509l-0 0c0.403 11.661 13.204 11.604 20.744 17.449-4.879-2.113-12.876-1.649-18.664-5.404 2.7 8.775 12.332 5.886 19.406 8.271-4.212-0.411-9.768 1.968-15.020 0.086 4.638 7.31 10.654 2.427 16.483 2.47-2.94 0.749-5.977 4.025-10.036 3.718 4.946 4.76 7.536 0.139 11.079-1.633-0.357 0.425-0.583 0.967-0.61 1.565-0.064 1.443 1.054 2.665 2.497 2.73s2.665-1.054 2.73-2.497c0.052-1.169-0.672-2.193-1.716-2.574z"/>
+  </symbol>
+</svg>
+
+<!-- GAME-18: Golden Wings activation panel — opened from the brake-slot
+     button (touch, PRELAUNCH) or #golden-btn (desktop). Shows the explain
+     text + stock; activating one owned charge requires SLIDING the latch up
+     (deliberate friction — no accidental spend). No stock → shop CTA.
+     Driven by src/golden-ui.js. -->
+<div id="golden-panel" hidden>
+  <div class="golden-panel-head">
+    <svg class="golden-wing-svg" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
+    <span data-i18n="hud.goldenTitle">Golden Wings</span>
+  </div>
+  <p class="golden-panel-sub" data-i18n="hud.goldenSub">×2 points until your next crash</p>
+  <p class="golden-panel-sub" data-i18n="hud.goldenOneUse">Single use — you can stock up on several.</p>
+  <div class="golden-slide" id="golden-slide" hidden>
+    <div class="golden-slide-track">
+      <button class="golden-slide-handle" id="golden-slide-handle" type="button" aria-label="Slide up to activate" data-i18n-aria="hud.goldenSlide">
+        <span class="material-symbols-outlined">keyboard_double_arrow_up</span>
+      </button>
+    </div>
+    <span class="golden-slide-label" data-i18n="hud.goldenSlide">Slide up to activate</span>
+  </div>
+  <p class="golden-panel-active" id="golden-panel-active" data-i18n="hud.goldenActive" hidden>Golden Wings active</p>
+  <button class="golden-panel-shop" id="golden-panel-shop" type="button" data-i18n="hud.goldenToShop" hidden>Get them in the shop</button>
+</div>
+
+<!-- Desktop-only Golden Wings button (the touch build reuses the brake slot
+     in PRELAUNCH instead — see touch-controls.js golden-mode). -->
+<button id="golden-btn" type="button" hidden aria-label="Golden Wings" data-i18n-aria="hud.goldenTitle">
+  <svg class="golden-wing-svg" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
+  <span class="golden-count-badge" id="golden-count-desktop" hidden></span>
+</button>
 
 <div id="boost-panel">
   <span class="material-symbols-outlined boost-panel-icon">rocket_launch</span>
@@ -396,6 +446,20 @@
       </button>
     </div>
     <div id="shop-packs" class="shop-packs"></div>
+    <!-- GAME-18: Golden Wings — sits WITH the pay tiles (Gerätetest-Feedback)
+         but in its own container: the packs grid is billing-gated (WEB-5)
+         while this tile pays in Obsidian and exists on every platform. Each
+         buy stacks one charge; activation happens at the pad (golden-ui). -->
+    <div id="shop-golden" class="shop-golden">
+      <button id="shop-golden-buy" class="pack-card pack-card-gold" type="button">
+        <svg class="golden-wing-svg pack-gold-icon" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
+        <span class="pack-amount pack-gold-title" data-i18n="hud.goldenTitle">Golden Wings</span>
+        <span class="pack-gold-sub" data-i18n="hud.goldenSub">×2 points until your next crash</span>
+        <span class="pack-gold-sub" data-i18n="hud.goldenOneUse">Single use — you can stock up on several.</span>
+        <span class="pack-gold-owned" id="shop-golden-owned"></span>
+        <span class="pack-price pack-gold-price" id="shop-golden-price"></span>
+      </button>
+    </div>
     <div id="shop-msg" class="shop-msg" aria-live="polite"></div>
     <div class="shop-footer">
       <button id="shop-view-skins" class="skin-getdiamonds" type="button" data-i18n="shop.viewSkins">View designs →</button>
@@ -801,6 +865,19 @@
       </p>
     </section>
 
+    <!-- Icon credit (GAME-18): the Golden-Wings feather glyph. Same static-
+         credit pattern as the audio block; the link anchor stays outside the
+         translated string (proper nouns + URL untranslated). -->
+    <section class="license-item license-audio">
+      <div class="license-head">
+        <span class="license-name" data-i18n="licenses.iconTitle">Icons</span>
+      </div>
+      <p class="license-audio-credit">
+        <span data-i18n="licenses.iconCredit">“Feather Wing” icon (Golden Wings) from SVG Repo, free for commercial use.</span>
+        <a href="https://www.svgrepo.com/svg/499156/feather-wing" target="_blank" rel="noopener">svgrepo.com</a>
+      </p>
+    </section>
+
     <div class="imprint-footer" data-i18n="licenses.footer">Swiss Innovation Studios · 2026</div>
   </div>
 </div>
@@ -854,6 +931,12 @@
 <div id="touch-actions" aria-hidden="true">
   <button id="touch-brake" type="button" class="touch-btn" aria-label="Brake" data-i18n-aria="a11y.brake">
     <span class="material-symbols-outlined">process_chart</span>
+    <!-- PRELAUNCH: the brake is inert on the ground, so this slot doubles as
+         the Golden-Wings button (.golden-mode, GAME-18) — icon swaps to the
+         gold wing, taps open #golden-panel instead of braking. -->
+    <svg class="golden-wing-svg brake-golden-icon" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
+    <!-- Stock count — top-right sticker, only while golden-mode + owned > 0. -->
+    <span class="golden-count-badge" id="golden-count-touch" hidden></span>
   </button>
   <button id="touch-oneshot" type="button" class="touch-btn touch-btn-oneshot" aria-label="One-Shot" data-i18n-aria="a11y.oneShot" hidden>
     <span class="material-symbols-outlined">rocket_launch</span>
