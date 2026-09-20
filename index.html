@@ -34,10 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-oxPXkgtD.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-DzMK3qFk.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-C8r8sQFB.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-BgNojSq3.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-B855AqC5.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-BBSB-tbd.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-CeSloYaV.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-CLhuVaEP.css">
 </head>
 <body>
 
@@ -54,6 +56,7 @@
   </div>
 </div>
 
+<!-- strip:test-mode -->
 <!-- Test-mode visual cue: red border framing the viewport, toggled by hud.js
      when gameState.testMode is true. Full-screen, ignores pointer events. -->
 <div id="test-mode-border" aria-hidden="true"></div>
@@ -68,6 +71,7 @@
 <button id="ads-toggle-btn" type="button" aria-label="Toggle test interstitial">
   <span class="material-symbols-outlined">smart_display</span>
 </button>
+<!-- /strip:test-mode -->
 
 <!-- Island compass — centred at top, Fortnite-style bar showing the player's
      heading with the 7 Canaries placed on it by relative bearing. Built and
@@ -300,6 +304,21 @@
 
 <div id="crash">
   <h2 data-i18n="crash.title">Crash landing</h2>
+  <!-- GAME-23 run summary — the score value + the continue button label are
+       filled by hud.renderCrashSummary() at overlay reveal (physics.js). -->
+  <div id="crash-summary">
+    <div class="crash-summary-text">
+      <div class="crash-summary-label" data-i18n="crash.summaryScore">Run score</div>
+      <div id="crash-summary-value">0</div>
+      <div class="crash-summary-hint" data-i18n="crash.summaryHint">Spend your points on upgrades in the hangar</div>
+    </div>
+    <!-- Static "your run" map snapshot (route since run start) — painted by
+         minimap.renderTraceSnapshot() at overlay reveal; hidden when the
+         trace is too short. -->
+    <canvas id="crash-summary-map" width="480" height="300" hidden></canvas>
+  </div>
+  <!-- MON-3 paid continue — golden CTA above the restart; never triggers an ad. -->
+  <button id="crash-continue-btn" type="button">Continue flight</button>
   <button id="restart-btn" data-i18n="crash.restart">Take Off Again</button>
   <div id="crash-hint" data-i18n="crash.hint">Spacebar</div>
   <div id="crash-secondary">
@@ -321,36 +340,27 @@
      All three are launched from the Welcome screen (and reachable via the
      ESC / pause button while in flight). -->
 <div id="hangar-overlay" class="modal-overlay" aria-hidden="true">
-  <div class="modal-panel modal-panel-wide" role="dialog" aria-modal="true" aria-labelledby="hangar-title">
+  <div class="modal-panel modal-panel-wide subscreen-panel" role="dialog" aria-modal="true" aria-labelledby="hangar-title">
     <button class="modal-close" data-modal-close="hangar" type="button" aria-label="Close" data-i18n-aria="a11y.close">×</button>
     <h2 id="hangar-title" data-i18n="hangar.title">Hangar</h2>
-    <div class="garage-wallet">
-      <div class="wallet-cell">
-        <span class="wallet-label">
-          <span class="material-symbols-outlined">stars</span><span data-i18n="hangar.points">Points</span>
-        </span>
-        <span class="wallet-value" id="garage-punkte">0</span>
-      </div>
-      <div class="wallet-cell">
-        <span class="wallet-label">
-          <span class="material-symbols-outlined">where_to_vote</span><span data-i18n="hangar.locations">Locations</span>
-        </span>
-        <span class="wallet-value" id="garage-gofios">0</span>
-      </div>
-      <!-- Obsidian (premium currency) wallet. Bought via IAP diamond packs in
-           the Shop; spent on skins + as an upgrade-buy fallback. -->
-      <div class="wallet-cell">
-        <span class="wallet-label">
-          <span class="material-symbols-outlined">diamond</span><span data-i18n="hangar.obsidian">Obsidian</span>
-        </span>
-        <span class="wallet-value" id="garage-obsidian">0</span>
-      </div>
-      <div class="wallet-cell">
-        <span class="wallet-label">
-          <span class="material-symbols-outlined">workspace_premium</span><span data-i18n="hangar.highscore">High score</span>
-        </span>
-        <span class="wallet-value" id="garage-highscore">0</span>
-      </div>
+    <!-- Wallet as header chips (GAME-25 Phase D) — same component as the
+         main menu. Diamonds bought via IAP packs in the Shop; spent on
+         skins + as an upgrade-buy fallback. -->
+    <div class="subscreen-wallet">
+      <span class="wallet-chip"><span id="garage-punkte">0</span><span class="wallet-chip-label" data-i18n="hangar.points">Points</span></span>
+      <button class="wallet-chip wallet-chip-btn" type="button" data-wallet-action="leaderboard">
+        <span id="garage-highscore">0</span><span class="wallet-chip-label" data-i18n="hangar.highscore">High score</span>
+      </button>
+      <!-- Locations = discovered POIs; tapping focuses the Booster row, which
+           is what they actually feed (not the Levels airport picker). -->
+      <button class="wallet-chip wallet-chip-btn" type="button" data-wallet-action="booster"
+              aria-label="Locations" data-i18n-aria="hangar.locations">
+        <span class="material-symbols-outlined wallet-chip-icon">where_to_vote</span><span id="garage-gofios">0</span>
+      </button>
+      <button class="wallet-chip wallet-chip-btn" type="button" data-wallet-action="shop"
+              aria-label="Diamonds" data-i18n-aria="hangar.obsidian">
+        <span class="material-symbols-outlined wallet-chip-icon">diamond</span><span id="garage-obsidian">0</span>
+      </button>
     </div>
     <!-- 2-column layout: 3D plane left, unified upgrades list right. Each
          row in the list combines status-bar, level indicator, and Kaufen /
@@ -383,15 +393,21 @@
           <div class="skin-picker-dots" id="hangar-skin-dots"></div>
           <button id="hangar-skin-action" class="skin-action" type="button"></button>
           <button id="hangar-skin-getdiamonds" class="skin-getdiamonds" type="button"
-                  data-i18n="hangar.getDiamonds" hidden>Get Obsidian →</button>
+                  data-i18n="hangar.getDiamonds" hidden>Get diamonds →</button>
         </div>
-        <div id="garage-upgrade-info" class="upgrade-info">
+        <!-- Press-and-hold info overlay (GAME-25 Phase D): covers the WHOLE
+             left column (plane + skin picker) while an upgrade row is held,
+             so the description needs no permanent space. -->
+        <div id="garage-upgrade-info" class="upgrade-info" hidden>
           <div class="upgrade-info-title"></div>
           <div class="upgrade-info-desc"></div>
         </div>
       </div>
       <div class="garage-cell garage-cell-upgrades">
-        <div class="garage-col-title" data-i18n="hangar.upgrades">Upgrades</div>
+        <div class="garage-upgrades-head">
+          <div class="garage-col-title" data-i18n="hangar.upgrades">Upgrades</div>
+          <div class="garage-col-hint" data-i18n="hangar.holdForInfo">Tap &amp; hold for details</div>
+        </div>
         <div id="garage-upgrades" class="upgrade-list"></div>
       </div>
     </div>
@@ -402,9 +418,9 @@
      (premium currency). Closes via cancel button, ESC, or backdrop click. -->
 <div id="obsidian-confirm" class="modal-overlay obsidian-confirm" aria-hidden="true">
   <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true">
-    <h2 data-i18n="obsidian.title">Pay with Obsidian?</h2>
+    <h2 data-i18n="obsidian.title">Pay with diamonds?</h2>
     <p id="obsidian-confirm-text" data-i18n-html="obsidian.text">This upgrade costs <strong></strong>.</p>
-    <p class="obsidian-confirm-warn" data-i18n-html="obsidian.warn">Obsidian is bought with real money. Only tap <em>Confirm</em> if you really want to spend Obsidian.</p>
+    <p class="obsidian-confirm-warn" data-i18n-html="obsidian.warn">Diamonds are bought with real money. Only tap <em>Confirm</em> if you really want to spend diamonds.</p>
     <div class="obsidian-confirm-actions">
       <button id="obsidian-confirm-cancel" type="button" class="btn-ghost" data-i18n="obsidian.cancel">Cancel</button>
       <button id="obsidian-confirm-ok" type="button" class="btn-primary" data-i18n="obsidian.confirm">Confirm</button>
@@ -417,19 +433,42 @@
      rendered by shop.js renderShop() from config.DIAMOND_PACKS; prices come
      from the store at runtime (iap.localizedPrice), priceFallback in dev. -->
 <div id="shop-overlay" class="modal-overlay" aria-hidden="true">
-  <div class="modal-panel modal-panel-wide" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+  <div class="modal-panel modal-panel-wide subscreen-panel" role="dialog" aria-modal="true" aria-labelledby="shop-title">
     <button class="modal-close" data-modal-close="shop" type="button" aria-label="Close" data-i18n-aria="a11y.close">×</button>
     <h2 id="shop-title" data-i18n="menu.shop">Shop</h2>
-    <div class="modal-wallet">
-      <span class="material-symbols-outlined modal-wallet-icon">diamond</span>
-      <span id="shop-obsidian">0</span>
+    <div class="subscreen-wallet">
+      <span class="wallet-chip" aria-label="Diamonds" data-i18n-aria="hangar.obsidian"><span class="material-symbols-outlined wallet-chip-icon">diamond</span><span id="shop-obsidian">0</span></span>
     </div>
-    <p class="shop-intro" data-i18n="shop.intro">Obsidian unlocks designs in the hangar and instant upgrades.</p>
-    <!-- Ad surfaces (AND-4) — only shown where ads exist (native, or ?mockads
-         for web flow testing); shop.js toggles #shop-extras via ads.isAvailable().
-         Watch-a-video grants Obsidian (daily-capped); Remove ads is a one-time
-         restorable purchase that hides interstitials (rewarded stays). -->
-    <div id="shop-extras" class="shop-extras" hidden>
+    <!-- Scroll container: header (title / chip / X) stays fixed, the shop
+         content scrolls inside (GAME-25 Phase D, wie Settings/Hangar). -->
+    <!-- Same skeleton as the Hangar (design.md „Spalten-Muster"): a free
+         floating 3D column left, ONE content card right. -->
+    <div class="shop-grid">
+      <div class="shop-cell-3d">
+        <div class="shop-3d-frame">
+          <canvas id="shop-3d"></canvas>
+        </div>
+        <!-- Golden Wings sits under the preview, exactly where the Hangar puts
+             the skin purchase (GAME-18: pays in Obsidian, every platform). -->
+        <div id="shop-golden" class="shop-golden">
+          <button id="shop-golden-buy" class="pack-card pack-card-gold" type="button">
+            <svg class="golden-wing-svg pack-gold-icon" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
+            <span class="pack-gold-text">
+              <span class="pack-amount pack-gold-title" data-i18n="hud.goldenTitle">Golden Wings</span>
+              <span class="pack-gold-sub" data-i18n="hud.goldenSub">×2 points until your next crash</span>
+              <span class="pack-gold-owned" id="shop-golden-owned"></span>
+            </span>
+            <span class="pack-price pack-gold-price" id="shop-golden-price"></span>
+          </button>
+        </div>
+      </div>
+    <div class="shop-body">
+      <p class="shop-intro" data-i18n="shop.intro">Diamonds unlock designs in the hangar and instant upgrades.</p>
+    <div id="shop-packs" class="shop-packs"></div>
+    <!-- One action row, 3 columns like the packs above: rewarded video,
+         remove-ads, restore. Each button hides on its own (ads vs. billing
+         availability), so the row survives either gate. -->
+    <div class="shop-actions" id="shop-extras">
       <button id="shop-watch-ad" class="shop-extra" type="button">
         <span class="material-symbols-outlined shop-extra-icon">smart_display</span>
         <span class="shop-extra-text">
@@ -445,45 +484,64 @@
           <span class="shop-extra-sub" id="shop-remove-ads-sub"></span>
         </span>
       </button>
-    </div>
-    <div id="shop-packs" class="shop-packs"></div>
-    <!-- GAME-18: Golden Wings — sits WITH the pay tiles (Gerätetest-Feedback)
-         but in its own container: the packs grid is billing-gated (WEB-5)
-         while this tile pays in Obsidian and exists on every platform. Each
-         buy stacks one charge; activation happens at the pad (golden-ui). -->
-    <div id="shop-golden" class="shop-golden">
-      <button id="shop-golden-buy" class="pack-card pack-card-gold" type="button">
-        <svg class="golden-wing-svg pack-gold-icon" aria-hidden="true"><use href="#icon-golden-wing"/></svg>
-        <span class="pack-amount pack-gold-title" data-i18n="hud.goldenTitle">Golden Wings</span>
-        <span class="pack-gold-sub" data-i18n="hud.goldenSub">×2 points until your next crash</span>
-        <span class="pack-gold-sub" data-i18n="hud.goldenOneUse">Single use — you can stock up on several.</span>
-        <span class="pack-gold-owned" id="shop-golden-owned"></span>
-        <span class="pack-price pack-gold-price" id="shop-golden-price"></span>
+      <button id="shop-restore" class="shop-extra" type="button">
+        <span class="material-symbols-outlined shop-extra-icon">restore</span>
+        <span class="shop-extra-text">
+          <span class="shop-extra-title" data-i18n="shop.restore">Restore purchases</span>
+        </span>
       </button>
     </div>
     <div id="shop-msg" class="shop-msg" aria-live="polite"></div>
     <div class="shop-footer">
-      <button id="shop-view-skins" class="skin-getdiamonds" type="button" data-i18n="shop.viewSkins">View designs →</button>
-      <button id="shop-restore" class="btn-ghost" type="button" data-i18n="shop.restore">Restore purchases</button>
+      <p class="shop-disclosure" data-i18n="shop.disclosure">Diamonds and designs are stored on this device.</p>
     </div>
-    <p class="shop-disclosure" data-i18n="shop.disclosure">Obsidian and designs are stored on this device.</p>
+    </div>
+    </div>
   </div>
 </div>
 
 <div id="settings-overlay" class="modal-overlay" aria-hidden="true">
-  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <!-- GAME-25 Phase C: side-rail navigation instead of one long scroll list.
+       Each .settings-page shows ONE section; the rail switches (shop.js).
+       All element ids inside the pages are unchanged — only re-housed. -->
+  <div class="modal-panel modal-panel-wide subscreen-panel settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
     <button class="modal-close" data-modal-close="settings" type="button" aria-label="Close" data-i18n-aria="a11y.close">×</button>
     <h2 id="settings-title" data-i18n="settings.title">Settings</h2>
+    <div class="settings-body">
+      <nav class="settings-rail" id="settings-rail">
+        <button class="settings-rail-item is-active" type="button" data-settings-page="lang">
+          <span class="material-symbols-outlined">translate</span><span data-i18n="settings.language">Language</span>
+        </button>
+        <button class="settings-rail-item" type="button" data-settings-page="audio">
+          <span class="material-symbols-outlined">music_note</span><span data-i18n="settings.audio">Audio</span>
+        </button>
+        <button class="settings-rail-item" type="button" data-settings-page="controls">
+          <span class="material-symbols-outlined">sports_esports</span><span data-i18n="settings.controls">Controls</span>
+        </button>
+        <button class="settings-rail-item" type="button" data-settings-page="gfx">
+          <span class="material-symbols-outlined">tune</span><span data-i18n="settings.quality">Graphics quality</span>
+        </button>
+        <button class="settings-rail-item" type="button" data-settings-page="games" id="settings-rail-games" hidden>
+          <span class="material-symbols-outlined">social_leaderboard</span><span data-i18n="settings.games">Google Play Games</span>
+        </button>
+        <button class="settings-rail-item settings-rail-danger" type="button" data-settings-page="danger">
+          <span class="material-symbols-outlined">warning</span><span data-i18n="settings.dangerZone">Danger zone</span>
+        </button>
+      </nav>
+      <div class="settings-pages">
 
     <!-- Language picker. Chips are populated at runtime by src/language-ui.js
          from i18n.SUPPORTED_LANGS so a newly-added locale needs no markup. -->
+    <section class="settings-page is-active" data-page="lang">
     <div class="settings-section settings-sec-lang">
       <div class="settings-section-title" data-i18n="settings.language">Language</div>
       <div class="settings-langs" id="settings-langs"></div>
     </div>
+    </section>
 
     <!-- Controls: the inverted-flight-control toggle (mirrors the in-tutorial
          switch; applies live, no reload) + a replay-tutorial shortcut. -->
+    <section class="settings-page" data-page="controls">
     <div class="settings-section settings-sec-controls">
       <div class="settings-section-title" data-i18n="settings.controls">Controls</div>
       <label class="tutorial-switch settings-invert">
@@ -523,10 +581,12 @@
         <span data-i18n="settings.replayTutorial">Replay tutorial</span>
       </button>
     </div>
+    </section>
 
     <!-- Audio (AUD-1): two channels — Musik + Ton (all wind/ambience/effects).
          Each an on/off toggle + a volume slider. Applies live (no reload); the
          two mutes are mirrored in the in-flight Pause overlay. -->
+    <section class="settings-page" data-page="audio">
     <div class="settings-section settings-sec-audio">
       <div class="settings-section-title" data-i18n="settings.audio">Audio</div>
 
@@ -556,7 +616,9 @@
 
       <p class="settings-note settings-audio-hint" data-i18n="settings.headphoneHint">Best experienced with headphones.</p>
     </div>
+    </section>
 
+    <section class="settings-page" data-page="gfx">
     <div class="settings-section settings-sec-quality">
       <div class="settings-section-head">
         <div class="settings-section-title" data-i18n="settings.quality">Graphics quality</div>
@@ -580,12 +642,14 @@
         <button id="settings-apply"  type="button" class="btn-primary" data-i18n="settings.apply">Apply &amp; reload</button>
       </div>
     </div>
+    </section>
 
     <!-- Google Play Games (AND-7). Android only — shop.js unhides this block on
          native Android (games.isAvailable()); web/iOS never see it. Status line
          + sign-in are rendered by renderGamesSettings(); the achievements /
          leaderboard buttons open the native PGS overlays (signing in first if
          needed). -->
+    <section class="settings-page" data-page="games">
     <div id="settings-games-block" class="settings-section settings-sec-games" hidden>
       <div class="settings-section-title" data-i18n="settings.games">Google Play Games</div>
       <!-- Status text is set by renderGamesSettings() via t() (signed-in shows
@@ -607,12 +671,18 @@
         </button>
       </div>
     </div>
+    </section>
 
+    <section class="settings-page" data-page="danger">
     <div class="settings-section settings-section-danger">
       <div class="settings-section-title settings-section-title-danger" data-i18n="settings.dangerZone">Danger zone</div>
       <p class="settings-danger-desc" data-i18n="settings.dangerDesc">Resets all progress: points, gofios, upgrades, discovered POIs, airports and checkpoint. Graphics settings are kept.</p>
       <div class="settings-danger-actions">
         <button id="settings-reset-save" type="button" class="btn-danger" data-i18n="settings.resetSave">Reset progress</button>
+      </div>
+    </div>
+    </section>
+
       </div>
     </div>
   </div>
@@ -718,48 +788,81 @@
      planeState.paused) so INTRO and FLYING freeze in the background. The
      scene keeps rendering, giving the menu a live wallpaper feel. -->
 <div id="welcome-overlay" aria-hidden="true">
+  <!-- GAME-25 "Variante B": no outer panel — the unified scrim is the ground,
+       only interactive elements carry glass surfaces. Landscape layout: brand
+       left, Start hero + 4-tile row right, wallet chips pinned top-right. -->
+  <!-- Greeting, top-centre. Text set by welcome.js on every open (Play-Games
+       display name when signed in, generic otherwise). -->
+  <div id="welcome-greeting" class="welcome-greeting"></div>
+  <!-- Positioned by welcome.js: vertically centred between greeting and the
+       slide latch, right edge flush with the slide's right edge. -->
+  <div class="welcome-wallet" id="welcome-wallet">
+    <button class="wallet-chip wallet-chip-btn" type="button" data-welcome-action="hangar">
+      <span id="welcome-punkte">0</span><span class="wallet-chip-label" data-i18n="hangar.points">Points</span>
+    </button>
+    <button class="wallet-chip wallet-chip-btn" type="button" data-welcome-action="leaderboard">
+      <span id="welcome-highscore">0</span><span class="wallet-chip-label" data-i18n="hangar.highscore">Highscore</span>
+    </button>
+    <button class="wallet-chip wallet-chip-btn" type="button" data-welcome-action="shop">
+      <span class="material-symbols-outlined wallet-chip-icon">diamond</span><span id="welcome-obsidian">0</span>
+    </button>
+  </div>
   <div class="welcome-panel" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-    <div class="welcome-brand">
-      <div class="welcome-eyebrow">Teide</div>
-      <h1 id="welcome-title">Glide the Canaries</h1>
+    <div class="welcome-main">
+      <div class="welcome-brand">
+        <!-- Live 3D preview of the equipped skin (welcome-plane.js). -->
+        <canvas id="welcome-3d" class="welcome-brand-canvas" width="2" height="2" aria-hidden="true"></canvas>
+        <div class="welcome-eyebrow">Teide</div>
+        <h1 id="welcome-title">Glide the Canaries</h1>
+      </div>
+      <div class="welcome-actions">
+        <!-- Slide-to-takeoff latch (Gabriel): green track, tile-wide handle,
+             shimmering hint text. Drag right past the threshold = Start;
+             Enter/Space on the focused handle starts too (keyboard/desktop).
+             Mechanic mirrors the Golden-Wings latch (golden-ui.js). -->
+        <div class="welcome-slide" id="welcome-slide">
+          <span class="welcome-slide-text" data-i18n="menu.slideToStart">Slide to take off</span>
+          <span class="material-symbols-outlined welcome-slide-arrow">arrow_forward</span>
+          <div class="welcome-slide-handle" id="welcome-slide-handle" role="button" tabindex="0" aria-label="Start">
+            <span class="welcome-item-chip"><span class="material-symbols-outlined">flight_takeoff</span></span>
+            <span class="welcome-item-body">
+              <span class="welcome-item-title" data-i18n="menu.start">Start</span>
+              <span class="welcome-item-sub" id="welcome-start-sub" data-i18n="menu.startSubDefault">Last checkpoint</span>
+            </span>
+          </div>
+        </div>
+        <nav class="welcome-nav">
+          <button class="welcome-item welcome-tile" data-welcome-action="levels" type="button">
+            <span class="welcome-item-chip"><span class="material-symbols-outlined">map</span></span>
+            <span class="welcome-item-body">
+              <span class="welcome-item-title" data-i18n="menu.levels">Levels</span>
+              <span class="welcome-item-sub" data-i18n="menu.levelsSub">Choose airport</span>
+            </span>
+          </button>
+          <button class="welcome-item welcome-tile" data-welcome-action="hangar" type="button">
+            <span class="welcome-item-chip"><span class="material-symbols-outlined">build</span></span>
+            <span class="welcome-item-body">
+              <span class="welcome-item-title" data-i18n="menu.hangar">Hangar</span>
+              <span class="welcome-item-sub" data-i18n="menu.hangarSub">Upgrades &amp; status</span>
+            </span>
+          </button>
+          <button class="welcome-item welcome-tile" data-welcome-action="shop" type="button">
+            <span class="welcome-item-chip"><span class="material-symbols-outlined">storefront</span></span>
+            <span class="welcome-item-body">
+              <span class="welcome-item-title" data-i18n="menu.shop">Shop</span>
+              <span class="welcome-item-sub" data-i18n="menu.shopSub">Diamonds &amp; designs</span>
+            </span>
+          </button>
+          <button class="welcome-item welcome-tile" data-welcome-action="settings" type="button">
+            <span class="welcome-item-chip"><span class="material-symbols-outlined">settings</span></span>
+            <span class="welcome-item-body">
+              <span class="welcome-item-title" data-i18n="menu.settings">Settings</span>
+              <span class="welcome-item-sub" data-i18n="menu.settingsSub">Graphics &amp; performance</span>
+            </span>
+          </button>
+        </nav>
+      </div>
     </div>
-    <nav class="welcome-nav">
-      <button class="welcome-item welcome-item-primary" data-welcome-action="start" type="button">
-        <span class="material-symbols-outlined">flight_takeoff</span>
-        <span class="welcome-item-body">
-          <span class="welcome-item-title" data-i18n="menu.start">Start</span>
-          <span class="welcome-item-sub" id="welcome-start-sub" data-i18n="menu.startSubDefault">Last checkpoint</span>
-        </span>
-      </button>
-      <button class="welcome-item" data-welcome-action="levels" type="button">
-        <span class="material-symbols-outlined">map</span>
-        <span class="welcome-item-body">
-          <span class="welcome-item-title" data-i18n="menu.levels">Levels</span>
-          <span class="welcome-item-sub" data-i18n="menu.levelsSub">Choose airport</span>
-        </span>
-      </button>
-      <button class="welcome-item" data-welcome-action="hangar" type="button">
-        <span class="material-symbols-outlined">build</span>
-        <span class="welcome-item-body">
-          <span class="welcome-item-title" data-i18n="menu.hangar">Hangar</span>
-          <span class="welcome-item-sub" data-i18n="menu.hangarSub">Upgrades &amp; status</span>
-        </span>
-      </button>
-      <button class="welcome-item" data-welcome-action="shop" type="button">
-        <span class="material-symbols-outlined">storefront</span>
-        <span class="welcome-item-body">
-          <span class="welcome-item-title" data-i18n="menu.shop">Shop</span>
-          <span class="welcome-item-sub" data-i18n="menu.shopSub">Obsidian &amp; designs</span>
-        </span>
-      </button>
-      <button class="welcome-item" data-welcome-action="settings" type="button">
-        <span class="material-symbols-outlined">settings</span>
-        <span class="welcome-item-body">
-          <span class="welcome-item-title" data-i18n="menu.settings">Settings</span>
-          <span class="welcome-item-sub" data-i18n="menu.settingsSub">Graphics &amp; performance</span>
-        </span>
-      </button>
-    </nav>
     <div class="welcome-footer">
       <button class="imprint-link" type="button" data-i18n="menu.imprint">Imprint</button>
       <button class="licenses-link" type="button" data-i18n="menu.licenses">Licences</button>
@@ -809,25 +912,29 @@
      (pickable spawn target). Picking spawns the player at that runway with
      the cinematic intro replayed for that fly-in feel. -->
 <div id="levels-overlay" aria-hidden="true">
-  <div class="levels-panel" role="dialog" aria-modal="true" aria-labelledby="levels-title">
+  <!-- GAME-25: same sub-screen skeleton as Settings / Hangar / Shop —
+       transparent shell, 22px title + legend chips + 44px X in one header
+       row, and ONE content card (the map itself). -->
+  <div class="levels-panel modal-panel subscreen-panel" role="dialog" aria-modal="true" aria-labelledby="levels-title">
     <button class="modal-close" data-modal-close="levels" type="button" aria-label="Close" data-i18n-aria="a11y.close">×</button>
-    <header class="levels-head">
-      <div class="levels-head-text">
-        <div class="levels-eyebrow" data-i18n="levels.eyebrow">Island</div>
-        <h2 id="levels-title">Tenerife</h2>
-      </div>
-      <div class="levels-legend">
-        <span class="levels-legend-item"><span class="levels-dot levels-dot-landed"></span><span data-i18n="levels.legendSpawn">Spawn</span></span>
-        <span class="levels-legend-item"><span class="levels-dot levels-dot-discovered"></span><span data-i18n="levels.legendDiscovered">Discovered</span></span>
-        <span class="levels-legend-item"><span class="levels-dot levels-dot-locked"></span><span data-i18n="levels.legendLocked">Unknown</span></span>
-      </div>
-    </header>
-    <div class="levels-stage">
-      <canvas id="levels-map" width="640" height="640"></canvas>
-      <div id="levels-markers" class="levels-markers"></div>
+    <h2 id="levels-title">Tenerife</h2>
+    <div class="subscreen-wallet levels-legend">
+      <span class="levels-legend-item"><span class="levels-dot levels-dot-landed"></span><span data-i18n="levels.legendSpawn">Spawn</span></span>
+      <span class="levels-legend-item"><span class="levels-dot levels-dot-discovered"></span><span data-i18n="levels.legendDiscovered">Discovered</span></span>
+      <span class="levels-legend-item"><span class="levels-dot levels-dot-locked"></span><span data-i18n="levels.legendLocked">Unknown</span></span>
     </div>
-    <div class="levels-hint" id="levels-hint" data-i18n="levels.hintDefault">
-      Tap a spawn point to start there.
+    <div class="levels-stage">
+      <!-- Viewport clips; #levels-layer carries the zoom/pan transform so the
+           raster AND its markers move as one (welcome.js). -->
+      <div class="levels-viewport" id="levels-viewport">
+        <div class="levels-layer" id="levels-layer">
+          <canvas id="levels-map" width="640" height="640"></canvas>
+          <div id="levels-markers" class="levels-markers"></div>
+        </div>
+      </div>
+      <div class="levels-hint" id="levels-hint" data-i18n="levels.hintDefault">
+        Tap a spawn point to start there.
+      </div>
     </div>
   </div>
 </div>
