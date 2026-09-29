@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-coV-0LQf.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-BULOpH4p.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-B855AqC5.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-BBSB-tbd.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-CeSloYaV.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-CLhuVaEP.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-yfaI7ph1.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-Biom33Fd.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-Cln7OzYR.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-DnzIEK53.css">
 </head>
 <body>
 
@@ -1092,6 +1092,16 @@
      orientation is portrait AND body has .touch-mode. The PWA / Capacitor
      manifest pins landscape, but the browser web build can't actually FORCE
      a rotation, so we cover the world with a rotate-device prompt instead. -->
+<!-- WebGL-Kontextverlust (IOS-5). WKWebView wirft den Kontext unter Speicherdruck
+     weg; ohne diesen Ausweg bliebe nur ein App-Neustart. Eingeblendet von
+     src/webgl-recovery.js, das auch synchron speichert, bevor es hier landet. -->
+<div id="gl-lost" role="alertdialog" aria-hidden="true" aria-labelledby="gl-lost-title">
+  <span class="material-symbols-outlined" aria-hidden="true">sync_problem</span>
+  <p id="gl-lost-title" data-i18n="glLost.title">Graphics were interrupted</p>
+  <p class="gl-lost-sub" data-i18n="glLost.sub">Your progress is saved. Reload to keep flying.</p>
+  <button id="gl-lost-reload" type="button" data-i18n="glLost.reload">Reload</button>
+</div>
+
 <div id="portrait-blocker" aria-hidden="true">
   <span class="material-symbols-outlined">screen_rotation</span>
   <p data-i18n="portrait.title">Please rotate your device</p>
