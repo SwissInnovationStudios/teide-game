@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-BULOpH4p.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-B8lUI1Db.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-yfaI7ph1.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-Biom33Fd.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-Cln7OzYR.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-DnzIEK53.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-BasMZXTN.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-CimV2LRx.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-CZceB2Z6.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-DO2QGCPW.css">
 </head>
 <body>
 
@@ -82,9 +82,9 @@
   </div>
 </div>
 
-<!-- Current-island name, top-left. Fades in while the plane is over an
-     island's landmass (driven by compass.js via islandAtPlane), fades out
-     over open sea. The island you're on is simultaneously dropped from the
+<!-- Current-island name, top-left under the score chip. Fades in while the
+     plane is over an island or within its coastal zone (compass.js via
+     islandAtPlane, ISLAND_ZONE_CFG), fades out over open sea. The island you're on is simultaneously dropped from the
      compass bar so it never shows in two places at once. -->
 <div id="island-name" aria-hidden="true"></div>
 
@@ -743,16 +743,17 @@
 </div>
 
 <!-- strip:test-mode -->
-<!-- Test-mode PIN gate. The 5-tap "Schweiz" gesture (src/test-mode-easter-egg.js)
-     opens this when test mode is OFF; entering the PIN enables it. Sits above the
-     imprint overlay (z 45 > 40). Deactivating needs no PIN. Store builds with
-     STRIP_TEST_MODE=1 remove this whole fenced block (IOS-8, vite.config.js). -->
+<!-- Test-mode PIN gate. The 5-tap "Schweiz" gesture and the T key
+     (src/test-mode-easter-egg.js) open this when test mode is OFF; the PIN is
+     checked against a hash (src/test-pin.js). Sits above the imprint overlay
+     (z 45 > 40). Deactivating needs no PIN. Store builds with STRIP_TEST_MODE=1
+     remove this whole fenced block (IOS-8, vite.config.js). -->
 <div id="testpin-overlay" class="modal-overlay obsidian-confirm" aria-hidden="true">
   <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true">
     <h2 data-i18n="testpin.title">Test mode</h2>
     <p data-i18n="testpin.prompt">Enter PIN</p>
     <input id="testpin-input" class="testpin-input" type="password" inputmode="numeric"
-           pattern="[0-9]*" maxlength="4" autocomplete="off" />
+           pattern="[0-9]*" maxlength="12" autocomplete="off" />
     <p id="testpin-error" class="obsidian-confirm-warn testpin-error" data-i18n="testpin.wrong">Wrong PIN</p>
     <div class="obsidian-confirm-actions">
       <button id="testpin-cancel" type="button" class="btn-ghost" data-i18n="testpin.cancel">Cancel</button>
