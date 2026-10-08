@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-Cfocwqth.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-CMDgybEn.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-BYeduDPL.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-D17EVzoL.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-D0FqhLfQ.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-Dr5Mx1jK.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-Cic29_2v.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-D8G_u2ab.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-3bj4kU9D.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-D-ZCb1hi.css">
 </head>
 <body>
 
@@ -50,11 +50,13 @@
 <div id="loading-screen">
   <div class="loading-inner">
     <div class="loading-title">Teide</div>
-    <div class="loading-sub" data-i18n="loading.sub">Building the world…</div>
+    <!-- Empty until i18n hydrates (synchronous, right after the bundle parses):
+         an English fallback flashed for ~0.2 s on non-English devices. -->
+    <div class="loading-sub" data-i18n="loading.sub"></div>
     <div class="loading-spinner"></div>
     <!-- GAME-38 island fact — filled by facts.showBootFact() right after the save loads. -->
     <div class="loading-fact">
-      <div class="loading-fact-eyebrow" data-i18n="loading.factEyebrow">Did you know?</div>
+      <div class="loading-fact-eyebrow" data-i18n="loading.factEyebrow"></div>
       <div id="loading-fact"></div>
     </div>
   </div>
@@ -281,7 +283,13 @@
       <span class="tutorial-invert-hint" data-i18n="tutorial.invertHint">Climbing feels backwards? Flip it.</span>
     </div>
   </div>
-  <button id="tutorial-skip" class="tutorial-skip" type="button" data-i18n="tutorial.skip">Skip</button>
+  <!-- GAME-37: restart + skip as ONE row top-right (a second row collided with
+       the altitude tape). Restart stays for the whole tutorial, skip
+       disappears after ring 2. -->
+  <div class="tutorial-topright">
+    <button id="tutorial-restart" class="tutorial-skip" type="button" data-i18n="tutorial.restart">Restart tutorial</button>
+    <button id="tutorial-skip" class="tutorial-skip" type="button" data-i18n="tutorial.skip">Skip</button>
+  </div>
   <div id="tutorial-flash" class="tutorial-flash"></div>
   <!-- Touch-only joystick discovery cue (E): pulses over the lower-left steering
        zone during the launch step so the player knows where to put their thumb.
@@ -297,6 +305,28 @@
      OUTSIDE #tutorial-layer (it pauses the world + must stay visible while the
      banner is hidden). Auto-dismisses after TUTORIAL_CFG.endCardMs or on the
      button; either way hands off to free flight. -->
+<!-- Edge-of-screen target chevron (target-cue.js): tutorial ring / thermal
+     (GAME-37) and the first-landing airport (GAME-7). Positioned + rotated per
+     frame; outside #tutorial-layer because the landing hint uses it too. -->
+<div id="target-cue" class="target-cue" aria-hidden="true">
+  <span class="material-symbols-outlined">navigation</span>
+</div>
+
+<!-- GAME-37: "Start over?" card after autoRestartFails consecutive fails on the
+     same step. Same chrome as the end card; restarts on its own after
+     autoRestartCardMs unless the player keeps trying. -->
+<div id="tutorial-restart-card" aria-hidden="true">
+  <div class="tutorial-end-panel" role="dialog" aria-modal="true">
+    <div class="tutorial-end-eyebrow" data-i18n="tutorial.eyebrow">Tutorial</div>
+    <h2 class="tutorial-end-title" data-i18n="tutorial.restartTitle">Start over?</h2>
+    <p class="tutorial-end-body" data-i18n="tutorial.restartBody">A fresh start often helps.</p>
+    <div class="tutorial-card-actions">
+      <button id="tutorial-restart-again" class="tutorial-end-go" type="button" data-i18n="tutorial.restartAgain">Restart</button>
+      <button id="tutorial-restart-keep" class="tutorial-card-ghost" type="button" data-i18n="tutorial.restartKeep">Keep trying</button>
+    </div>
+  </div>
+</div>
+
 <div id="tutorial-end" aria-hidden="true">
   <div class="tutorial-end-panel" role="dialog" aria-modal="true">
     <div class="tutorial-end-eyebrow" data-i18n="tutorial.eyebrow">Tutorial</div>
