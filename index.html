@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-uLbLrC7G.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-CwnRXkVg.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-COBN-aVN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-Cic29_2v.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-D8G_u2ab.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-3bj4kU9D.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-D-ZCb1hi.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-C0spnLeT.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-DXnVjiYT.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/scene-jzF8sDGH.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-pm2uMrPQ.css">
 </head>
 <body>
 
@@ -262,6 +262,7 @@
 <div id="controls-hint">
   <span class="hint-keyboard" data-i18n="hud.hintNormal">↑ ↓ Pitch · ← → Bank · Space Brake · Shift Boost · F One-Shot</span>
   <span class="hint-touch" data-i18n="hud.hintNormalTouch">Steer with joystick · Right Boost / Brake / One-Shot</span>
+  <span class="hint-dual" data-i18n="hud.hintNormalDual">Thumbs = wings · Centre Boost / Brake / One-Shot</span>
 </div>
 
 <!-- First-run flight tutorial (GAME-1). Non-blocking HUD layer driven by
@@ -296,8 +297,71 @@
        Hidden on desktop + once they've launched. -->
   <div id="tutorial-steer-hint" aria-hidden="true">
     <span class="tutorial-steer-pulse"></span>
-    <span class="material-symbols-outlined tutorial-steer-icon">open_with</span>
-    <span class="tutorial-steer-label" data-i18n="tutorial.steerHint">Steer here</span>
+    <span class="material-symbols-outlined tutorial-steer-icon lbl-touch">open_with</span>
+    <span class="material-symbols-outlined tutorial-steer-icon lbl-dual">swipe_vertical</span>
+    <span class="tutorial-steer-label lbl-touch" data-i18n="tutorial.steerHint">Steer here</span>
+    <span class="tutorial-steer-label lbl-dual" data-i18n="tutorial.steerHintLeft">Left thumb</span>
+  </div>
+  <!-- GAME-40: second cue over the RIGHT zone — dual thumb only (body.dual-thumb). -->
+  <div id="tutorial-steer-hint-r" aria-hidden="true">
+    <span class="tutorial-steer-pulse"></span>
+    <span class="material-symbols-outlined tutorial-steer-icon lbl-dual">swipe_vertical</span>
+    <span class="tutorial-steer-label" data-i18n="tutorial.steerHintRight">Right thumb</span>
+  </div>
+</div>
+
+<!-- GAME-40: steering picker — first thing the guided flight shows on touch
+     devices. Carousel (arrows / swipe / dots) over three slides, each with a
+     schematic CSS demo (no 3D preview — Gabriel's fallback), the mode name and
+     a one-liner; tilt carries an "experimental" line. The CTA confirms via
+     setControlMode (same path as the Settings chips). Same chrome as the end
+     card; driven by tutorial.js. -->
+<div id="tutorial-steer-card" aria-hidden="true">
+  <div class="tutorial-end-panel tutorial-steer-panel" role="dialog" aria-modal="true">
+    <div class="tutorial-end-eyebrow" data-i18n="tutorial.eyebrow">Tutorial</div>
+    <h2 class="tutorial-end-title" data-i18n="tutorial.steerTitle">Choose your steering</h2>
+    <div class="tutorial-steer-carousel">
+      <button id="tutorial-steer-prev" class="tutorial-steer-arrow" type="button" aria-label="Previous" data-i18n-aria="tutorial.steerPrev">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <div id="tutorial-steer-view" class="tutorial-steer-view">
+        <div id="tutorial-steer-track" class="tutorial-steer-track">
+          <div class="tutorial-steer-slide" data-steer="touch">
+            <div class="steer-demo steer-demo-touch">
+              <div class="steer-phone"><span class="steer-ring"></span><span class="steer-thumb"></span></div>
+            </div>
+            <div class="tutorial-steer-name" data-i18n="settings.steerJoystick">Joystick</div>
+            <div class="tutorial-steer-desc" data-i18n="tutorial.steerJoystickDesc">Drag anywhere on the left half. Short flicks, then let go.</div>
+          </div>
+          <div class="tutorial-steer-slide" data-steer="dual">
+            <div class="steer-demo steer-demo-dual">
+              <div class="steer-phone">
+                <span class="steer-rail steer-rail-l"><span class="steer-thumb"></span></span>
+                <span class="steer-rail steer-rail-r"><span class="steer-thumb"></span></span>
+              </div>
+            </div>
+            <div class="tutorial-steer-name" data-i18n="settings.steerDual">Dual thumb</div>
+            <div class="tutorial-steer-desc" data-i18n="tutorial.steerDualDesc">Each thumb is a wing. Both down = climb, one down + one up = bank.</div>
+          </div>
+          <div class="tutorial-steer-slide" data-steer="gyro">
+            <div class="steer-demo steer-demo-gyro">
+              <div class="steer-phone"><span class="material-symbols-outlined steer-plane">flight</span></div>
+            </div>
+            <div class="tutorial-steer-name" data-i18n="settings.steerGyro">Tilt</div>
+            <div class="tutorial-steer-desc" data-i18n="tutorial.steerGyroDesc">Tilt your device to bank and pitch. Tap boost to take off.</div>
+            <div class="tutorial-steer-exp" data-i18n="tutorial.steerExperimental">Experimental — still being improved</div>
+          </div>
+        </div>
+      </div>
+      <button id="tutorial-steer-next" class="tutorial-steer-arrow" type="button" aria-label="Next" data-i18n-aria="tutorial.steerNext">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+    <div id="tutorial-steer-dots" class="tutorial-steer-dots" aria-hidden="true">
+      <button type="button" data-i="0"></button><button type="button" data-i="1"></button><button type="button" data-i="2"></button>
+    </div>
+    <p class="tutorial-steer-anytime" data-i18n="tutorial.steerAnytime">You can change this anytime in Settings → Controls.</p>
+    <button id="tutorial-steer-go" class="tutorial-end-go" type="button">Start</button>
   </div>
 </div>
 
@@ -590,19 +654,40 @@
           <span class="settings-invert-hint" data-i18n="settings.invertPitchHint">Pull down to climb</span>
         </span>
       </label>
-      <!-- Gyro tilt steering (AND-1). Mobile only — shop.js hides this block on
-           desktop (keyboard there). The sensitivity + recalibrate buttons appear
-           only while gyro is on; sensitivity opens its own popup (like the
-           graphics "Advanced") so the controls column stays compact. -->
+      <!-- Auto-level (GAME-40): roll self-righting while the roll input is
+           neutral. Applies live in every steering mode (keyboard too); knobs in
+           AUTO_LEVEL_CFG. -->
+      <label id="settings-autolevel-row" class="tutorial-switch settings-invert">
+        <input id="settings-autolevel-toggle" type="checkbox" />
+        <span class="tutorial-switch-track"><span class="tutorial-switch-thumb"></span></span>
+        <span class="settings-invert-text">
+          <span class="tutorial-switch-label" data-i18n="settings.autoLevel">Auto-level</span>
+          <span class="settings-invert-hint" data-i18n="settings.autoLevelHint">Wings return to level when you let go</span>
+        </span>
+      </label>
+      <!-- Steering source (AND-1 gyro, GAME-40 dual thumb). Mobile only — shop.js
+           hides this block on desktop (keyboard there). Three chips in the
+           language-chip look (active = hero pill), a one-line hint for the
+           active mode below. The sensitivity + recalibrate buttons appear only
+           while tilt is on; sensitivity opens its own popup (like the graphics
+           "Advanced") so the controls column stays compact. -->
       <div id="settings-gyro-block" class="settings-gyro-block" hidden>
-        <label class="tutorial-switch settings-invert">
-          <input id="settings-gyro-toggle" type="checkbox" />
-          <span class="tutorial-switch-track"><span class="tutorial-switch-thumb"></span></span>
-          <span class="settings-invert-text">
-            <span class="tutorial-switch-label" data-i18n="settings.gyroControl">Tilt steering</span>
-            <span class="settings-invert-hint" data-i18n="settings.gyroControlHint">Tilt your device to steer</span>
-          </span>
-        </label>
+        <div class="settings-steer-title" data-i18n="settings.steering">Steering</div>
+        <div id="settings-steer" class="settings-langs settings-steer" role="group" aria-label="Steering" data-i18n-aria="settings.steering">
+          <button type="button" class="lang-chip" data-steer="touch">
+            <span class="material-symbols-outlined lang-chip-flag">gamepad</span>
+            <span class="lang-chip-label" data-i18n="settings.steerJoystick">Joystick</span>
+          </button>
+          <button type="button" class="lang-chip" data-steer="dual">
+            <span class="material-symbols-outlined lang-chip-flag">swipe_vertical</span>
+            <span class="lang-chip-label" data-i18n="settings.steerDual">Dual thumb</span>
+          </button>
+          <button type="button" class="lang-chip" data-steer="gyro">
+            <span class="material-symbols-outlined lang-chip-flag">screen_rotation</span>
+            <span class="lang-chip-label" data-i18n="settings.steerGyro">Tilt</span>
+          </button>
+        </div>
+        <div id="settings-steer-hint" class="settings-invert-hint settings-steer-hint" data-i18n="settings.steerHintTouch">Drag anywhere on the left half</div>
         <div id="settings-gyro-tune" class="settings-gyro-tune" hidden>
           <button id="settings-gyro-sens-open" class="settings-replay-btn" type="button">
             <span class="material-symbols-outlined">tune</span>
@@ -1096,6 +1181,24 @@
 <div id="touch-joystick" class="touch-joystick" hidden aria-hidden="true">
   <div class="touch-joystick-base"></div>
   <div class="touch-joystick-thumb"></div>
+</div>
+
+<!-- Dual-thumb wing control (GAME-40): two dynamic thumb zones, left and right
+     half below the top HUD strip. Live only under body.dual-thumb (Settings →
+     Steering → Dual thumb). Each zone carries its own origin marker — a
+     vertical rail (the only axis that steers) plus a dot that follows the
+     thumb — positioned by dual-thumb-controls.js at the touch-down point. -->
+<div id="dual-zone-left" class="dual-zone dual-zone-left" aria-hidden="true">
+  <div class="dual-marker" hidden>
+    <div class="dual-marker-rail"></div>
+    <div class="dual-marker-dot"></div>
+  </div>
+</div>
+<div id="dual-zone-right" class="dual-zone dual-zone-right" aria-hidden="true">
+  <div class="dual-marker" hidden>
+    <div class="dual-marker-rail"></div>
+    <div class="dual-marker-dot"></div>
+  </div>
 </div>
 
 <!-- Vertical stack, top-to-bottom: brake, one-shot, boost. Boost sits at
