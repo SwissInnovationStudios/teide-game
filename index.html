@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-C7_uo6uK.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-CuhMFPdq.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-CfTNdcJA.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-CUQXPwCN.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-DC-VD7Aq.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/vegetation-D0DsN_Ff.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-FEXc1Kdn.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-CXsMHE09.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-IV302HGM.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/vegetation-DuLEmLQ-.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-BmgUcp2u.css">
 </head>
 <body>
 
@@ -67,15 +67,11 @@
      when gameState.testMode is true. Full-screen, ignores pointer events. -->
 <div id="test-mode-border" aria-hidden="true"></div>
 
-<!-- Test-mode-only floating toggles (visibility synced by debug-perf.js while
-     gameState.testMode is on). FPS button flips planeState.showPerf (perf
-     overlay); ads button flips planeState.showAds (forced crash interstitial,
-     read by ads.js). Both work without DevTools on a device build. -->
+<!-- Test-mode-only floating toggle (visibility synced by debug-perf.js while
+     gameState.testMode is on). Flips planeState.showPerf (perf overlay);
+     works without DevTools on a device build. -->
 <button id="perf-toggle-btn" type="button" aria-label="Toggle FPS overlay">
   <span class="material-symbols-outlined">speed</span>
-</button>
-<button id="ads-toggle-btn" type="button" aria-label="Toggle test interstitial">
-  <span class="material-symbols-outlined">smart_display</span>
 </button>
 <!-- /strip:test-mode -->
 
@@ -453,6 +449,13 @@
          main menu. Diamonds bought via IAP packs in the Shop; spent on
          skins + as an upgrade-buy fallback. -->
     <div class="subscreen-wallet">
+      <!-- AND-5: cloud-save status (cloud-save.js) — tap explains it or leads
+           to the sign-in. Hidden where there is no cloud save (web; iOS until
+           AND-5 step 1). -->
+      <button id="hangar-cloud-chip" class="wallet-chip wallet-chip-btn wallet-chip-cloud is-off" type="button"
+              data-wallet-action="cloud" data-cloud-indicator aria-label="Cloud save" data-i18n-aria="cloud.chipAria" hidden>
+        <span class="material-symbols-outlined wallet-chip-icon">cloud_off</span>
+      </button>
       <span class="wallet-chip"><span id="garage-punkte">0</span><span class="wallet-chip-label" data-i18n="hangar.points">Points</span></span>
       <button class="wallet-chip wallet-chip-btn" type="button" data-wallet-action="leaderboard">
         <span id="garage-highscore">0</span><span class="wallet-chip-label" data-i18n="hangar.highscore">High score</span>
@@ -796,6 +799,11 @@
           <span class="material-symbols-outlined">leaderboard</span>
           <span data-i18n="settings.gamesLeaderboard">Leaderboard</span>
         </button>
+        <!-- AND-5: same status + dialog as the Hangar cloud chip (cloud-save.js). -->
+        <button class="settings-replay-btn is-off" type="button" data-wallet-action="cloud" data-cloud-indicator hidden>
+          <span class="material-symbols-outlined">cloud_off</span>
+          <span data-i18n="cloud.title">Cloud save</span>
+        </button>
       </div>
     </div>
     </section>
@@ -803,7 +811,7 @@
     <section class="settings-page" data-page="danger">
     <div class="settings-section settings-section-danger">
       <div class="settings-section-title settings-section-title-danger" data-i18n="settings.dangerZone">Danger zone</div>
-      <p class="settings-danger-desc" data-i18n="settings.dangerDesc">Resets all progress: points, gofios, upgrades, discovered POIs, airports and checkpoint. Graphics settings are kept.</p>
+      <p class="settings-danger-desc" data-i18n="settings.dangerDesc">Resets your progress: points, high score, discovered locations, airports and upgrades. Your diamonds, designs and Golden Wings are kept, as are all settings. The tutorial starts again.</p>
       <div class="settings-danger-actions">
         <button id="settings-reset-save" type="button" class="btn-danger" data-i18n="settings.resetSave">Reset progress</button>
       </div>
@@ -860,11 +868,57 @@
 <div id="reset-confirm" class="modal-overlay obsidian-confirm" aria-hidden="true">
   <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true">
     <h2 data-i18n="reset.title">Really delete your save?</h2>
-    <p data-i18n-html="reset.text">All points, gofios, upgrades and discovered places will be lost. You'll start at <strong>Tenerife Nord</strong> with the basic plane.</p>
+    <p data-i18n-html="reset.text">Points, high score, discovered locations and upgrades will be lost. Your diamonds, designs and Golden Wings stay. You'll start at <strong>Tenerife Nord</strong> with the basic plane.</p>
     <p class="obsidian-confirm-warn" data-i18n="reset.warn">This action cannot be undone.</p>
     <div class="obsidian-confirm-actions">
       <button id="reset-confirm-cancel" type="button" class="btn-ghost" data-i18n="reset.cancel">Cancel</button>
       <button id="reset-confirm-ok" type="button" class="btn-danger" data-i18n="reset.confirm">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- AND-5 cloud save: one dialog, four modes — chip info signed in / out,
+     the greeting after a cloud restore, the choice when both sides have
+     progress. cloud-save.js toggles the .cloud-mode nodes; the static default
+     is the choice, the tallest mode, so audit:ui measures the worst case. -->
+<div id="cloud-dialog" class="modal-overlay obsidian-confirm" aria-hidden="true" data-mode="conflict">
+  <div class="modal-panel obsidian-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="cloud-dialog-title">
+    <h2 id="cloud-dialog-title" data-i18n="cloud.title">Cloud save</h2>
+    <!-- data-platform: the texts name the service (Play Games / iCloud). -->
+    <p class="cloud-mode cloud-mode-on" data-platform="android" data-i18n="cloud.onAndroid" hidden>Your progress is backed up with your Google Play Games account. On a new device, sign in with the same account and carry on where you left off.</p>
+    <p class="cloud-mode cloud-mode-on" data-platform="ios" data-i18n="cloud.onIOS" hidden>Your progress is backed up in iCloud with your Apple ID. On a new device, sign in with the same Apple ID and carry on where you left off.</p>
+    <p class="cloud-mode cloud-mode-off" data-platform="android" data-i18n="cloud.offAndroid" hidden>Sign in to Google Play Games to back up your progress and take it to a new device.</p>
+    <p class="cloud-mode cloud-mode-off" data-platform="ios" data-i18n="cloud.offIOS" hidden>Sign in to iCloud in your iPhone or iPad settings to back up your progress and take it to a new device.</p>
+    <p class="cloud-mode cloud-mode-restored" data-platform="android" data-i18n="cloud.restoredAndroid" hidden>Welcome back! Your progress was loaded from Google Play Games.</p>
+    <p class="cloud-mode cloud-mode-restored" data-platform="ios" data-i18n="cloud.restoredIOS" hidden>Welcome back! Your progress was loaded from iCloud.</p>
+    <div class="cloud-mode cloud-mode-conflict">
+      <p data-platform="android" data-i18n="cloud.conflictAndroid">Google Play Games holds a different save than this device. Which one do you want to keep?</p>
+      <p data-platform="ios" data-i18n="cloud.conflictIOS" hidden>iCloud holds a different save than this device. Which one do you want to keep?</p>
+      <!-- Cloud row and button first; the side with more progress gets the
+           ring + weight and the green button (cloud-save.js). -->
+      <dl class="cloud-compare">
+        <div class="cloud-compare-row is-ahead" id="cloud-compare-cloud-row">
+          <dt data-platform="android" data-i18n="cloud.cloudLabelAndroid">Google Play Games (cloud)</dt>
+          <dt data-platform="ios" data-i18n="cloud.cloudLabelIOS" hidden>iCloud</dt>
+          <dd><span data-i18n="hangar.highscore">High score</span> <span data-stat="best">1,234,567</span>
+            · <span class="material-symbols-outlined cloud-stat-icon" role="img" aria-label="Locations" data-i18n-aria="hangar.locations">where_to_vote</span><span data-stat="places">299</span>
+            · <span class="material-symbols-outlined cloud-stat-icon" role="img" aria-label="Diamonds" data-i18n-aria="hangar.obsidian">diamond</span><span data-stat="diamonds">1,600</span></dd>
+        </div>
+        <div class="cloud-compare-row" id="cloud-compare-device-row">
+          <dt data-i18n="cloud.onDevice">This device</dt>
+          <dd><span data-i18n="hangar.highscore">High score</span> <span data-stat="best">1,234,567</span>
+            · <span class="material-symbols-outlined cloud-stat-icon" role="img" aria-label="Locations" data-i18n-aria="hangar.locations">where_to_vote</span><span data-stat="places">299</span>
+            · <span class="material-symbols-outlined cloud-stat-icon" role="img" aria-label="Diamonds" data-i18n-aria="hangar.obsidian">diamond</span><span data-stat="diamonds">1,600</span></dd>
+        </div>
+      </dl>
+      <p class="obsidian-confirm-warn" data-i18n="cloud.conflictWarn">The other save will be overwritten.</p>
+    </div>
+    <div class="obsidian-confirm-actions">
+      <button type="button" class="btn-primary cloud-mode cloud-mode-conflict" data-cloud-action="use-cloud" data-i18n="cloud.useCloud">Load cloud save</button>
+      <button type="button" class="btn-ghost cloud-mode cloud-mode-conflict" data-cloud-action="keep-device" data-i18n="cloud.keepDevice">Keep device save</button>
+      <button type="button" class="btn-ghost cloud-mode cloud-mode-on cloud-mode-off cloud-mode-restored" data-cloud-action="close" data-i18n="a11y.close" hidden>Close</button>
+      <!-- iOS has no in-app iCloud sign-in: that lives in the system settings. -->
+      <button type="button" class="btn-primary cloud-mode cloud-mode-off" data-platform="android" data-cloud-action="sign-in" data-i18n="settings.gamesSignIn" hidden>Sign in</button>
     </div>
   </div>
 </div>
