@@ -34,12 +34,12 @@
 
 <!-- Fonts are self-hosted (bundled via src/style.css @font-face → src/fonts/).
      No Google Fonts CDN so the app renders fully offline in the WebView. -->
-  <script type="module" crossorigin src="/teide-game/assets/index-CuhMFPdq.js"></script>
+  <script type="module" crossorigin src="/teide-game/assets/index-DdvmcQtc.js"></script>
   <link rel="modulepreload" crossorigin href="/teide-game/assets/index-CfTNdcJA.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-CXsMHE09.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-IV302HGM.js">
-  <link rel="modulepreload" crossorigin href="/teide-game/assets/vegetation-DuLEmLQ-.js">
-  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-BmgUcp2u.css">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/pois-BcGm1UuV.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/save-lGeoFpf9.js">
+  <link rel="modulepreload" crossorigin href="/teide-game/assets/vegetation-D8PTWYOX.js">
+  <link rel="stylesheet" crossorigin href="/teide-game/assets/index-Ok3xZ70T.css">
 </head>
 <body>
 
@@ -119,6 +119,19 @@
      Hidden on desktop via body.touch-mode gate in style.css. -->
 <button id="map-btn" type="button" aria-label="Map" data-i18n-aria="a11y.map" hidden>
   <span class="material-symbols-outlined">map</span>
+</button>
+
+<!-- GAME-50: hangar on the runway — PRELAUNCH only (hangar-cue.js toggles
+     [hidden]), left of the map button: Hangar · Map · Pause. Breathes while an
+     upgrade the player has not seen yet is affordable. -->
+<button id="hangar-btn" type="button" aria-label="Hangar" data-i18n-aria="crash.hangar" hidden>
+  <span class="material-symbols-outlined">build</span>
+</button>
+
+<!-- MON-7 A: "no more ads" offer under the compass, once per session right
+     after an interstitial while the plane waits on the runway (noads-offer.js). -->
+<button id="noads-offer" type="button">
+  <span class="material-symbols-outlined" aria-hidden="true">block</span><span id="noads-offer-label"></span>
 </button>
 
 <!-- Backdrop for the map-card-as-modal on touch. Catches taps outside the
@@ -405,10 +418,11 @@
       <div class="crash-summary-text">
         <div class="crash-summary-label" data-i18n="crash.summaryScore">Run score</div>
         <div id="crash-summary-value">0</div>
-        <!-- GAME-36 tip slot — text picked per crash by hud.renderCrashSummary() (tips.js). -->
-        <div class="crash-summary-hint">
+        <!-- GAME-36 tip slot — text picked per crash by hud.renderCrashSummary() (tips.js).
+             GAME-50: the hangar tip turns the line into a link (.is-link + chevron). -->
+        <div id="crash-summary-hint" class="crash-summary-hint">
           <span class="material-symbols-outlined crash-summary-tip-icon" aria-hidden="true">lightbulb</span>
-          <span id="crash-summary-tip"></span>
+          <span class="crash-summary-tip-body"><span id="crash-summary-tip"></span><span class="material-symbols-outlined crash-summary-tip-go" aria-hidden="true">chevron_right</span></span>
         </div>
       </div>
       <!-- Static "your run" map snapshot (route since run start) — painted by
@@ -417,8 +431,15 @@
       <canvas id="crash-summary-map" width="480" height="300" hidden></canvas>
     </div>
     <div id="crash-actions">
-      <!-- MON-3 paid continue — golden CTA above the restart; never triggers an ad. -->
-      <button id="crash-continue-btn" type="button">Continue flight</button>
+      <!-- MON-3 paid continue — golden CTA above the restart; never triggers an
+           interstitial. MON-7 B: beside it the same continue for a rewarded
+           video (first continue of a run, hud.canContinueWithVideo). -->
+      <div class="crash-continue-group">
+        <button id="crash-continue-btn" type="button">Continue flight</button>
+        <button id="crash-continue-video" type="button" aria-label="Continue flight with a video" data-i18n-aria="crash.continueVideoAria" hidden>
+          <span class="material-symbols-outlined" aria-hidden="true">smart_display</span><span data-i18n="crash.continueVideo">Video</span>
+        </button>
+      </div>
       <button id="restart-btn" data-i18n="crash.restart">Take Off Again</button>
     </div>
     <div id="crash-hint" data-i18n="crash.hint">Spacebar</div>
@@ -427,7 +448,7 @@
         <span class="material-symbols-outlined">home</span><span data-i18n="pause.home">Main menu</span>
       </button>
       <button id="crash-hangar-btn" type="button">
-        <span class="material-symbols-outlined">garage</span><span data-i18n="crash.hangar">Hangar</span>
+        <span class="material-symbols-outlined">build</span><span data-i18n="crash.hangar">Hangar</span>
       </button>
       <button id="crash-shop-btn" type="button">
         <span class="material-symbols-outlined">storefront</span><span data-i18n="crash.shop">Shop</span>
@@ -888,7 +909,7 @@
     <p class="cloud-mode cloud-mode-on" data-platform="android" data-i18n="cloud.onAndroid" hidden>Your progress is backed up with your Google Play Games account. On a new device, sign in with the same account and carry on where you left off.</p>
     <p class="cloud-mode cloud-mode-on" data-platform="ios" data-i18n="cloud.onIOS" hidden>Your progress is backed up in iCloud with your Apple ID. On a new device, sign in with the same Apple ID and carry on where you left off.</p>
     <p class="cloud-mode cloud-mode-off" data-platform="android" data-i18n="cloud.offAndroid" hidden>Sign in to Google Play Games to back up your progress and take it to a new device.</p>
-    <p class="cloud-mode cloud-mode-off" data-platform="ios" data-i18n="cloud.offIOS" hidden>Sign in to iCloud in your iPhone or iPad settings to back up your progress and take it to a new device.</p>
+    <p class="cloud-mode cloud-mode-off" data-platform="ios" data-i18n="cloud.offIOS" hidden>Sign in to iCloud in your iPhone or iPad settings and turn on iCloud Drive to back up your progress and take it to a new device.</p>
     <p class="cloud-mode cloud-mode-restored" data-platform="android" data-i18n="cloud.restoredAndroid" hidden>Welcome back! Your progress was loaded from Google Play Games.</p>
     <p class="cloud-mode cloud-mode-restored" data-platform="ios" data-i18n="cloud.restoredIOS" hidden>Welcome back! Your progress was loaded from iCloud.</p>
     <div class="cloud-mode cloud-mode-conflict">
@@ -1038,7 +1059,7 @@
               <span class="welcome-item-sub" data-i18n="menu.levelsSub">Choose airport</span>
             </span>
           </button>
-          <button class="welcome-item welcome-tile" data-welcome-action="hangar" type="button">
+          <button id="welcome-hangar-tile" class="welcome-item welcome-tile" data-welcome-action="hangar" type="button">
             <span class="welcome-item-chip"><span class="material-symbols-outlined">build</span></span>
             <span class="welcome-item-body">
               <span class="welcome-item-title" data-i18n="menu.hangar">Hangar</span>
